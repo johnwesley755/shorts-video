@@ -1,0 +1,3 @@
+file 'C:\Users\johnw\OneDrive\Desktop\GIT\shorts\storage\videos\temp\blank.jpg'
+duration 30.0
+file 'C:\Users\johnw\OneDrive\Desktop\GIT\shorts\storage\videos\temp\blank.jpg'
