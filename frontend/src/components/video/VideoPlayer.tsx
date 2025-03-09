@@ -9,7 +9,7 @@ const VideoPlayer = ({ src }: VideoPlayerProps) => {
         src={src} 
         controls 
         className="w-full h-auto"
-        controlsList="nodownload"
+        controlsList="download"
       >
         Your browser does not support the video tag.
       </video>
