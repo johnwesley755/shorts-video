@@ -5,12 +5,12 @@ export const useVideoGeneration = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const generateVideoFromText = async (text: string): Promise<string | null> => {
+  const generateVideoFromText = async (text: string, enableAudio: boolean = true): Promise<string | null> => {
     setLoading(true);
     setError(null);
     
     try {
-      const videoUrl = await generateVideo(text);
+      const videoUrl = await generateVideo(text, enableAudio);
       return videoUrl;
     } catch (err) {
       setError('Failed to generate video. Please try again.');

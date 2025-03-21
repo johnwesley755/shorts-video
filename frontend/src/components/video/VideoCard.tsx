@@ -27,13 +27,13 @@ const VideoCard = ({ video }: VideoCardProps) => {
       whileHover={{ y: -5 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="overflow-hidden border-2 border-blue-100 dark:border-blue-900 bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-blue-950">
+      <Card className="overflow-hidden border-2 border-blue-100 dark:border-blue-900 bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-black">
         <div className="relative">
           {isPlaying ? (
             <VideoPlayer src={video.url} />
           ) : (
             <div 
-              className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center cursor-pointer relative overflow-hidden"
+              className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-black dark:to-indigo-900/10 flex items-center justify-center cursor-pointer relative overflow-hidden"
               onClick={() => setIsPlaying(true)}
             >
               {/* Decorative elements */}
@@ -80,7 +80,7 @@ const VideoCard = ({ video }: VideoCardProps) => {
           <Button 
             variant="outline" 
             size="sm"
-            className="text-gray-600 dark:text-gray-400"
+            className="text-white dark:text-gray-400 font-bold"
             asChild
           >
             <a href={video.url} download>

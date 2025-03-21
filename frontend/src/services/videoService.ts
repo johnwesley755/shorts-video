@@ -9,13 +9,21 @@ export interface VideoData {
   createdAt: string;
 }
 
-export const generateVideo = async (text: string): Promise<string> => {
+// Update the generateVideo function to use the correct API URL
+export const generateVideo = async (text: string, enableAudio: boolean = true): Promise<string> => {
   try {
-    const response = await axios.post(`${API_URL}/videos/generate`, { text });
+    const response = await axios.post(`${API_URL}/videos/generate`, {
+      text,
+      enableAudio
+    });
+    
     return response.data.videoUrl;
   } catch (error) {
     console.error('Error generating video:', error);
-    throw error;
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error || 'Failed to generate video');
+    }
+    throw new Error('Failed to connect to the video generation service');
   }
 };
 

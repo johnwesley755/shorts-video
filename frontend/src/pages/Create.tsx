@@ -20,7 +20,16 @@ import {
   Info,
   Lightbulb,
   Zap,
+  Facebook,
+  Twitter,
+  Instagram,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 import { Skeleton } from "../components/ui/skeleton";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
@@ -47,34 +56,38 @@ import {
 const Create = () => {
   // Load state from localStorage on initial render
   const [videoUrl, setVideoUrl] = useState<string | null>(() => {
-    const saved = localStorage.getItem('videoUrl');
+    const saved = localStorage.getItem("videoUrl");
     return saved ? saved : null;
   });
-  
-  const { generateVideo, loading: apiLoading, error: apiError } = useVideoGeneration();
-  
+
+  const {
+    generateVideo,
+    loading: apiLoading,
+    error: apiError,
+  } = useVideoGeneration();
+
   // Load progress and prompt from localStorage
   const [progress, setProgress] = useState(() => {
-    const saved = localStorage.getItem('videoProgress');
+    const saved = localStorage.getItem("videoProgress");
     return saved ? parseInt(saved) : 0;
   });
-  
+
   const [promptText, setPromptText] = useState(() => {
-    const saved = localStorage.getItem('videoPrompt');
-    return saved || '';
+    const saved = localStorage.getItem("videoPrompt");
+    return saved || "";
   });
-  
+
   // Manage loading state with localStorage
   const [loading, setLoading] = useState(() => {
-    const saved = localStorage.getItem('videoLoading');
-    return saved === 'true';
+    const saved = localStorage.getItem("videoLoading");
+    return saved === "true";
   });
-  
+
   const [error, setError] = useState<string | null>(() => {
-    const saved = localStorage.getItem('videoError');
+    const saved = localStorage.getItem("videoError");
     return saved || null;
   });
-  
+
   // Force dark theme on mount and keep it that way
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -83,32 +96,32 @@ const Create = () => {
   // Save state to localStorage whenever it changes
   useEffect(() => {
     if (videoUrl) {
-      localStorage.setItem('videoUrl', videoUrl);
+      localStorage.setItem("videoUrl", videoUrl);
     } else {
-      localStorage.removeItem('videoUrl');
+      localStorage.removeItem("videoUrl");
     }
   }, [videoUrl]);
-  
+
   useEffect(() => {
-    localStorage.setItem('videoProgress', progress.toString());
+    localStorage.setItem("videoProgress", progress.toString());
   }, [progress]);
-  
+
   useEffect(() => {
-    localStorage.setItem('videoPrompt', promptText);
+    localStorage.setItem("videoPrompt", promptText);
   }, [promptText]);
-  
+
   useEffect(() => {
-    localStorage.setItem('videoLoading', loading.toString());
+    localStorage.setItem("videoLoading", loading.toString());
   }, [loading]);
-  
+
   useEffect(() => {
     if (error) {
-      localStorage.setItem('videoError', error);
+      localStorage.setItem("videoError", error);
     } else {
-      localStorage.removeItem('videoError');
+      localStorage.removeItem("videoError");
     }
   }, [error]);
-  
+
   // Sync with API loading state
   useEffect(() => {
     setLoading(apiLoading);
@@ -136,20 +149,32 @@ const Create = () => {
     return () => clearInterval(interval);
   }, [loading, progress]);
 
-  const handleSubmit = async (text: string) => {
+  // Add state for audio preference
+  const [enableAudio, setEnableAudio] = useState(() => {
+    const saved = localStorage.getItem("enableAudio");
+    return saved !== "false"; // Default to true
+  });
+
+  const handleSubmit = async (text: string, options?: { enableAudio: boolean }) => {
     setProgress(0);
     setPromptText(text);
     setLoading(true);
     setError(null);
     
+    // Update audio preference if provided
+    if (options?.enableAudio !== undefined) {
+      setEnableAudio(options.enableAudio);
+    }
+
     try {
-      const result = await generateVideo(text);
+      // Pass enableAudio to the API
+      const result = await generateVideo(text, options?.enableAudio ?? enableAudio);
       if (result) {
         setVideoUrl(result);
         setProgress(100);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -165,7 +190,7 @@ const Create = () => {
         transition={{ duration: 0.5 }}
         className="container mx-auto relative z-10"
       >
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center py-8 mb-8">
           <div className="relative">
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-70"></div>
             <div className="relative">
@@ -357,17 +382,61 @@ const Create = () => {
                   <div className="w-full">
                     <VideoPlayer src={videoUrl} />
                     <div className="mt-4 flex justify-between">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2 border-purple-900 bg-transparent hover:bg-purple-900/30 text-gray-300"
-                      >
-                        <Share2 className="h-4 w-4" />
-                        Share
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 border-purple-900 bg-transparent hover:bg-purple-900/30 text-gray-300"
+                          >
+                            <Share2 className="h-4 w-4" />
+                            Share
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-slate-800 border-purple-900 text-white">
+                          <DropdownMenuItem 
+                            className="flex items-center gap-2 cursor-pointer hover:bg-purple-900/30"
+                            onClick={() => window.open(`https://wa.me/?text=Check out this AI-generated video: ${window.location.origin}/video?url=${encodeURIComponent(videoUrl || '')}`, '_blank')}
+                          >
+                            <div className="bg-green-600 p-1 rounded-full">
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4a8.94 8.94 0 0 0-7.64 13.5L4 22l4.59-.39a8.93 8.93 0 0 0 3.46.67 8.94 8.94 0 0 0 8.94-8.94 8.87 8.87 0 0 0-3.39-7.02zm-5.55 13.7a7.43 7.43 0 0 1-3.81-1.05l-.27-.16-2.83.74.76-2.76-.18-.28a7.43 7.43 0 0 1-1.14-3.99 7.44 7.44 0 0 1 7.45-7.45c1.99 0 3.85.77 5.25 2.17a7.4 7.4 0 0 1 2.17 5.28 7.45 7.45 0 0 1-7.4 7.5zm4.1-5.59c-.22-.11-1.32-.65-1.53-.73-.21-.07-.35-.11-.5.11-.15.22-.57.73-.7.88-.13.14-.26.16-.48.05-.22-.11-.94-.35-1.8-1.1-.66-.6-1.11-1.34-1.24-1.57-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.2-.69-1.65-.18-.43-.37-.37-.5-.38h-.42c-.15 0-.39.06-.59.28-.2.22-.78.77-.78 1.87 0 1.1.8 2.17.92 2.32.12.15 1.65 2.53 4.01 3.54.56.24 1 .39 1.34.5.56.18 1.07.15 1.48.09.45-.07 1.38-.56 1.58-1.11.2-.55.2-1.01.14-1.11-.06-.1-.22-.16-.44-.28z"/>
+                              </svg>
+                            </div>
+                            WhatsApp
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="flex items-center gap-2 cursor-pointer hover:bg-purple-900/30"
+                            onClick={() => window.open(`https://www.instagram.com/direct/inbox?text=Check out this AI-generated video: ${window.location.origin}/video?url=${encodeURIComponent(videoUrl || '')}`, '_blank')}
+                          >
+                            <div className="bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-700 p-1 rounded-full">
+                              <Instagram className="h-3 w-3 text-white" />
+                            </div>
+                            Instagram
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="flex items-center gap-2 cursor-pointer hover:bg-purple-900/30"
+                            onClick={() => window.open(`https://twitter.com/intent/tweet?text=Check out this AI-generated video&url=${window.location.origin}/video?url=${encodeURIComponent(videoUrl || '')}`, '_blank')}
+                          >
+                            <div className="bg-blue-500 p-1 rounded-full">
+                              <Twitter className="h-3 w-3 text-white" />
+                            </div>
+                            Twitter
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="flex items-center gap-2 cursor-pointer hover:bg-purple-900/30"
+                            onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${window.location.origin}/video?url=${encodeURIComponent(videoUrl || '')}`, '_blank')}
+                          >
+                            <div className="bg-blue-700 p-1 rounded-full">
+                              <Facebook className="h-3 w-3 text-white" />
+                            </div>
+                            Facebook
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <Button
                         variant="default"
-                        className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold"
                         asChild
                       >
                         <a href={videoUrl} download>

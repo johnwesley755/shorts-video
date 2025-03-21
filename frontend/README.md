@@ -1,54 +1,108 @@
-# React + TypeScript + Vite
+# 🎬 Shorts - AI Video Generation Platform ✨
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<div align="center">
+  <img src="public/logo.png" alt="Shorts Logo" width="200"/>
+  <p><em>✨ Transform your ideas into stunning videos with just a text prompt! ✨</em></p>
+</div>
 
-Currently, two official plugins are available:
+## 🚀 Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Shorts is a powerful AI-powered platform that transforms text descriptions into high-quality videos. Whether you're a content creator, marketer, or storyteller, Shorts helps you bring your ideas to life without complex video editing skills.
 
-## Expanding the ESLint configuration
+## 🌟 Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **🪄 Text-to-Video Generation**: Create videos from simple text descriptions
+- **🎙️ Audio Narration**: Optional AI voice narration for your videos
+- **🎮 User-Friendly Interface**: Clean, intuitive design for seamless creation
+- **🔄 Social Sharing**: Easily share your creations on WhatsApp, Instagram, Twitter, and Facebook
+- **📚 Video Library**: Save and manage all your generated videos
+- **📱 Responsive Design**: Works on desktop and mobile devices
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 🛠️ Tech Stack
+
+### Frontend 🖥️
+- ⚛️ React with TypeScript
+- ⚡ Vite for fast development
+- 🎨 Tailwind CSS for styling
+- 🎭 Framer Motion for animations
+- 🧩 Shadcn UI components
+
+### Backend 🔧
+- 🐍 Python with Flask
+- 🤖 AI video generation APIs
+- 🔐 RESTful API architecture
+
+## 📋 Getting Started
+
+### Prerequisites 📝
+- Node.js (v16+)
+- Python (v3.8+)
+- npm or yarn
+- pip
+
+### Installation 💻
+
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/shorts.git
+cd shorts
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Install dependencies for both frontend and backend
+```bash
+# Install frontend dependencies
+cd frontend
+npm install
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+# Install backend dependencies
+cd ../backend
+pip install -r requirements.txt
+```
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+3. Set up environment variables
+```bash
+# In the backend directory
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+4. Start the development servers
+```bash
+# Start backend (from backend directory)
+python app.py
+
+# Start frontend (from frontend directory)
+npm run dev
+```
+
+5. Open your browser and navigate to `http://localhost:5173` 🌐
+
+## 📸 Screenshots
+
+<div align="center">
+  <img src="../docs/screenshots/home.png" alt="Home Screen" width="45%"/>
+  <img src="../docs/screenshots/create.png" alt="Create Screen" width="45%"/>
+</div>
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. 🍴 Fork the repository
+2. 🌿 Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. 💾 Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. 📤 Push to the branch (`git push origin feature/amazing-feature`)
+5. 🔍 Open a Pull Request
+
+## 🙏 Acknowledgements
+
+- 🧠 [OpenAI](https://openai.com/) for AI technologies
+- 🎨 [Shadcn UI](https://ui.shadcn.com/) for beautiful UI components
+- 👥 All our contributors and supporters
+
+---
+
+<div align="center">
+  <p>Made by John Wesley</p>
+</div>
 ```

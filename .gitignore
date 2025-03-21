@@ -57,6 +57,7 @@ yarn-error.log
 /backend/audio/
 /backend/temp/
 /backend/logs/
+/storage/
 
 # Large model files
 *.ckpt
