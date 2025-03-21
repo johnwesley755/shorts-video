@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import VideoCard from '../components/video/VideoCard';
 import { getVideos } from '../services/videoService';
 
+
 interface Video {
   id: string;
   title: string;
@@ -13,6 +14,11 @@ const Library = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Force dark theme on mount and keep it that way
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+  }, []);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -32,8 +38,8 @@ const Library = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold mb-8">Video Library</h1>
+      <div className="container mx-auto py-8 px-4 mt-20">
+        <h1 className="text-3xl font-bold mb-8 mt-20">Video Library</h1>
         <div className="flex justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
