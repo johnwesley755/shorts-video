@@ -5,7 +5,13 @@ from routes.video_routes import video_bp
 from config import Config
 
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS to allow requests from your Vercel frontend
+CORS(app, resources={r"/*": {"origins": [
+    "https://shorts-video-alpha.vercel.app",
+    "http://localhost:3000",  # For local development
+    "http://localhost:5173"   # For Vite dev server
+]}})
 
 # Register blueprints
 app.register_blueprint(video_bp, url_prefix='/api/videos')
