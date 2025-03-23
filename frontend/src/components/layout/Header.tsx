@@ -66,7 +66,7 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center group">
             <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-70 group-hover:opacity-100 transition duration-200"></div>
+              <div className="absolute -inset-1 bg-black rounded-full blur opacity-70 group-hover:opacity-100 transition duration-200"></div>
               <div className="relative">
                 <Zap className="h-6 w-6 text-white" />
               </div>
@@ -79,11 +79,11 @@ const Header = () => {
           {isMobile ? (
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-white">
+                <Button variant="ghost" size="icon" className="text-white cursor-pointer">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-slate-900 border-purple-900 text-white p-0">
+              <SheetContent side="right" className="bg-black border-purple-900 text-white p-0">
                 <div className="flex flex-col h-full">
                   <div className="p-4 border-b border-purple-900/50">
                     <div className="flex items-center">

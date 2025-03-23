@@ -2,19 +2,26 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
 
+// Update the interface to include hasCaptions
 export interface VideoData {
   id: string;
   title: string;
   url: string;
   createdAt: string;
+  hasCaptions?: boolean;
 }
 
-// Update the generateVideo function to use the correct API URL
-export const generateVideo = async (text: string, enableAudio: boolean = true): Promise<string> => {
+// Update the generateVideo function to accept enableCaptions parameter
+export const generateVideo = async (
+  text: string, 
+  enableAudio: boolean = true,
+  enableCaptions: boolean = true
+): Promise<string> => {
   try {
     const response = await axios.post(`${API_URL}/videos/generate`, {
       text,
-      enableAudio
+      enableAudio,
+      enableCaptions
     });
     
     return response.data.videoUrl;
