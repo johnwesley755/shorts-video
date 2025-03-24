@@ -182,6 +182,59 @@ const Create = () => {
 
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 py-12 px-4 text-white">
+      {/* Background grid */}
+      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10"></div>
+
+      {/* Animated background patterns */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Animated circles */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/5 rounded-full animate-pulse"></div>
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/5 rounded-full animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
+
+        {/* Floating particles */}
+        <div className="absolute top-20 right-40 w-3 h-3 bg-purple-400/30 rounded-full animate-float"></div>
+        <div
+          className="absolute top-40 left-20 w-2 h-2 bg-blue-400/30 rounded-full animate-float"
+          style={{ animationDelay: "1.5s" }}
+        ></div>
+        <div
+          className="absolute bottom-40 right-60 w-4 h-4 bg-indigo-400/30 rounded-full animate-float"
+          style={{ animationDelay: "2.2s" }}
+        ></div>
+        <div
+          className="absolute bottom-20 left-40 w-3 h-3 bg-violet-400/30 rounded-full animate-float"
+          style={{ animationDelay: "3s" }}
+        ></div>
+
+        {/* Geometric shapes */}
+        <div className="absolute top-1/3 right-1/3 w-64 h-64 border border-purple-500/10 rounded-lg rotate-45 animate-spin-slow"></div>
+        <div
+          className="absolute bottom-1/3 left-1/3 w-64 h-64 border border-blue-500/10 rounded-lg -rotate-45 animate-spin-slow"
+          style={{ animationDelay: "2s" }}
+        ></div>
+
+        {/* Gradient wave */}
+        <svg
+          className="absolute bottom-0 left-0 w-full"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="url(#gradient1)"
+            fillOpacity="0.15"
+            d="M0,192L48,176C96,160,192,128,288,133.3C384,139,480,181,576,186.7C672,192,768,160,864,154.7C960,149,1056,171,1152,165.3C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          ></path>
+          <defs>
+            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#4338ca" />
+              <stop offset="100%" stopColor="#7e22ce" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10"></div>
 
       <motion.div
@@ -394,38 +447,80 @@ const Create = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="bg-slate-800 border-purple-900 text-white">
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="flex items-center gap-2 cursor-pointer hover:bg-purple-900/30"
-                            onClick={() => window.open(`https://wa.me/?text=Check out this AI-generated video: ${window.location.origin}/video?url=${encodeURIComponent(videoUrl || '')}`, '_blank')}
+                            onClick={() =>
+                              window.open(
+                                `https://wa.me/?text=Check out this AI-generated video: ${
+                                  window.location.origin
+                                }/video?url=${encodeURIComponent(
+                                  videoUrl || ""
+                                )}`,
+                                "_blank"
+                              )
+                            }
                           >
                             <div className="bg-green-600 p-1 rounded-full">
-                              <svg width="15" height="15" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4a8.94 8.94 0 0 0-7.64 13.5L4 22l4.59-.39a8.93 8.93 0 0 0 3.46.67 8.94 8.94 0 0 0 8.94-8.94 8.87 8.87 0 0 0-3.39-7.02zm-5.55 13.7a7.43 7.43 0 0 1-3.81-1.05l-.27-.16-2.83.74.76-2.76-.18-.28a7.43 7.43 0 0 1-1.14-3.99 7.44 7.44 0 0 1 7.45-7.45c1.99 0 3.85.77 5.25 2.17a7.4 7.4 0 0 1 2.17 5.28 7.45 7.45 0 0 1-7.4 7.5zm4.1-5.59c-.22-.11-1.32-.65-1.53-.73-.21-.07-.35-.11-.5.11-.15.22-.57.73-.7.88-.13.14-.26.16-.48.05-.22-.11-.94-.35-1.8-1.1-.66-.6-1.11-1.34-1.24-1.57-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.2-.69-1.65-.18-.43-.37-.37-.5-.38h-.42c-.15 0-.39.06-.59.28-.2.22-.78.77-.78 1.87 0 1.1.8 2.17.92 2.32.12.15 1.65 2.53 4.01 3.54.56.24 1 .39 1.34.5.56.18 1.07.15 1.48.09.45-.07 1.38-.56 1.58-1.11.2-.55.2-1.01.14-1.11-.06-.1-.22-.16-.44-.28z"/>
+                              <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                fill="white"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4a8.94 8.94 0 0 0-7.64 13.5L4 22l4.59-.39a8.93 8.93 0 0 0 3.46.67 8.94 8.94 0 0 0 8.94-8.94 8.87 8.87 0 0 0-3.39-7.02zm-5.55 13.7a7.43 7.43 0 0 1-3.81-1.05l-.27-.16-2.83.74.76-2.76-.18-.28a7.43 7.43 0 0 1-1.14-3.99 7.44 7.44 0 0 1 7.45-7.45c1.99 0 3.85.77 5.25 2.17a7.4 7.4 0 0 1 2.17 5.28 7.45 7.45 0 0 1-7.4 7.5zm4.1-5.59c-.22-.11-1.32-.65-1.53-.73-.21-.07-.35-.11-.5.11-.15.22-.57.73-.7.88-.13.14-.26.16-.48.05-.22-.11-.94-.35-1.8-1.1-.66-.6-1.11-1.34-1.24-1.57-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.2-.69-1.65-.18-.43-.37-.37-.5-.38h-.42c-.15 0-.39.06-.59.28-.2.22-.78.77-.78 1.87 0 1.1.8 2.17.92 2.32.12.15 1.65 2.53 4.01 3.54.56.24 1 .39 1.34.5.56.18 1.07.15 1.48.09.45-.07 1.38-.56 1.58-1.11.2-.55.2-1.01.14-1.11-.06-.1-.22-.16-.44-.28z" />
                               </svg>
                             </div>
                             WhatsApp
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="flex items-center gap-2 cursor-pointer hover:bg-purple-900/30"
-                            onClick={() => window.open(`https://www.instagram.com/direct/inbox?text=Check out this AI-generated video: ${window.location.origin}/video?url=${encodeURIComponent(videoUrl || '')}`, '_blank')}
+                            onClick={() =>
+                              window.open(
+                                `https://www.instagram.com/direct/inbox?text=Check out this AI-generated video: ${
+                                  window.location.origin
+                                }/video?url=${encodeURIComponent(
+                                  videoUrl || ""
+                                )}`,
+                                "_blank"
+                              )
+                            }
                           >
                             <div className="bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-700 p-1 rounded-full">
                               <Instagram className="h-3 w-3 text-white" />
                             </div>
                             Instagram
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="flex items-center gap-2 cursor-pointer hover:bg-purple-900/30"
-                            onClick={() => window.open(`https://twitter.com/intent/tweet?text=Check out this AI-generated video&url=${window.location.origin}/video?url=${encodeURIComponent(videoUrl || '')}`, '_blank')}
+                            onClick={() =>
+                              window.open(
+                                `https://twitter.com/intent/tweet?text=Check out this AI-generated video&url=${
+                                  window.location.origin
+                                }/video?url=${encodeURIComponent(
+                                  videoUrl || ""
+                                )}`,
+                                "_blank"
+                              )
+                            }
                           >
                             <div className="bg-blue-500 p-1 rounded-full">
                               <Twitter className="h-3 w-3 text-white" />
                             </div>
                             Twitter
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="flex items-center gap-2 cursor-pointer hover:bg-purple-900/30"
-                            onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${window.location.origin}/video?url=${encodeURIComponent(videoUrl || '')}`, '_blank')}
+                            onClick={() =>
+                              window.open(
+                                `https://www.facebook.com/sharer/sharer.php?u=${
+                                  window.location.origin
+                                }/video?url=${encodeURIComponent(
+                                  videoUrl || ""
+                                )}`,
+                                "_blank"
+                              )
+                            }
                           >
                             <div className="bg-blue-700 p-1 rounded-full">
                               <Facebook className="h-3 w-3 text-white" />

@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// Detect if running locally and use appropriate API URL
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_URL = isLocalhost 
+  ? "http://localhost:5000/api" 
+  : (import.meta.env.VITE_API_URL || "https://shorts-video-e0qy.onrender.com/api");
 
 export interface VideoData {
   id: string;
