@@ -14,21 +14,23 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden">
+    <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-white">
       {/* Background grid */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10"></div>
+      <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10"></div>
       
       {/* Animated background patterns */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="fixed inset-0">
         {/* Animated circles */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/5 rounded-full animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/5 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
         
-        {/* Floating particles */}
+        {/* Floating particles - enhanced with more particles */}
         <div className="absolute top-20 right-40 w-3 h-3 bg-purple-400/30 rounded-full animate-float"></div>
         <div className="absolute top-40 left-20 w-2 h-2 bg-blue-400/30 rounded-full animate-float" style={{ animationDelay: '1.5s' }}></div>
         <div className="absolute bottom-40 right-60 w-4 h-4 bg-indigo-400/30 rounded-full animate-float" style={{ animationDelay: '2.2s' }}></div>
         <div className="absolute bottom-20 left-40 w-3 h-3 bg-violet-400/30 rounded-full animate-float" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute top-60 right-20 w-2 h-2 bg-pink-400/30 rounded-full animate-float" style={{ animationDelay: '2.7s' }}></div>
+        <div className="absolute bottom-60 left-60 w-3 h-3 bg-cyan-400/30 rounded-full animate-float" style={{ animationDelay: '1.8s' }}></div>
         
         {/* Geometric shapes */}
         <div className="absolute top-1/3 right-1/3 w-64 h-64 border border-purple-500/10 rounded-lg rotate-45 animate-spin-slow"></div>
@@ -51,16 +53,11 @@ const Home = () => {
       </div>
 
       <div className="container mx-auto px-4 py-16 relative z-10">
-        <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="relative"
-          >
-            {/* Glowing icon */}
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] text-center">
+       
+            {/* Glowing icon with enhanced glow effect */}
             <div className="relative mb-6 mx-auto">
-              
+              <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl transform scale-150 animate-pulse"></div>
               <div className="relative bg-slate-900/50 backdrop-blur-sm p-3 rounded-full inline-block">
                 <Zap className="h-10 w-10 text-purple-400" />
               </div>
@@ -69,7 +66,7 @@ const Home = () => {
             <h1 className="relative text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
               AI Text to Video Shorts Generator
             </h1>
-          </motion.div>
+    
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -88,7 +85,7 @@ const Home = () => {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-3xl"
           >
-            <Card className="shadow-xl hover:shadow-2xl transition-all duration-300 border border-purple-900 backdrop-blur-sm bg-slate-900/80 overflow-hidden group hover:border-purple-600">
+            <Card className="shadow-xl hover:shadow-2xl transition-all duration-300 border border-purple-900 backdrop-blur-sm bg-slate-900/80 overflow-hidden group hover:border-purple-600 hover:translate-y-[-5px]">
               <CardContent className="p-8 relative">
                 <div className="absolute -right-12 -top-12 w-24 h-24 bg-blue-600/10 rounded-full"></div>
                 <div className="absolute -left-12 -bottom-12 w-24 h-24 bg-purple-600/10 rounded-full"></div>
@@ -97,7 +94,7 @@ const Home = () => {
                 <div className="absolute inset-0 border border-purple-500/0 group-hover:border-purple-500/30 rounded-lg transition-all duration-500"></div>
 
                 <div className="mb-6 text-purple-400 relative">
-                  
+                  <div className="absolute inset-0 bg-purple-500/10 rounded-full blur-md transform scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <div className="relative bg-slate-900 rounded-full p-3 inline-block">
                     <Plus className="h-8 w-8" />
                   </div>
@@ -128,7 +125,7 @@ const Home = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-xl hover:shadow-2xl transition-all duration-300 border border-purple-900 backdrop-blur-sm bg-slate-900/80 overflow-hidden group hover:border-blue-600">
+            <Card className="shadow-xl hover:shadow-2xl transition-all duration-300 border border-purple-900 backdrop-blur-sm bg-slate-900/80 overflow-hidden group hover:border-blue-600 hover:translate-y-[-5px]">
               <CardContent className="p-8 relative">
                 <div className="absolute -right-12 -top-12 w-24 h-24 bg-purple-600/10 rounded-full"></div>
                 <div className="absolute -left-12 -bottom-12 w-24 h-24 bg-blue-600/10 rounded-full"></div>
@@ -137,6 +134,7 @@ const Home = () => {
                 <div className="absolute inset-0 border border-blue-500/0 group-hover:border-blue-500/30 rounded-lg transition-all duration-500"></div>
 
                 <div className="mb-6 text-blue-400 relative">
+                  <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-md transform scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <div className="relative bg-slate-900 rounded-full p-3 inline-block">
                     <Library className="h-8 w-8" />
                   </div>
@@ -172,11 +170,11 @@ const Home = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.5 }}
-            className="mt-16"
+            className="mt-16 mb-8"
           >
-            <div className="p-4 bg-purple-950/30 rounded-md border border-purple-800/50 max-w-lg mx-auto backdrop-blur-sm">
+            <div className="p-4 bg-purple-950/30 rounded-md border border-purple-800/50 max-w-lg mx-auto backdrop-blur-sm hover:bg-purple-950/40 transition-colors duration-300">
               <div className="flex items-center justify-center">
-                <Sparkles className="h-4 w-4 text-purple-400 mr-2" />
+                <Sparkles className="h-4 w-4 text-purple-400 mr-2 animate-pulse" />
                 <p className="text-sm text-purple-300">
                   Powered by advanced AI technology to create stunning videos
                   from text

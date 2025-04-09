@@ -33,12 +33,7 @@ import {
 import { Skeleton } from "../components/ui/skeleton";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/ui/tabs";
+
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import {
@@ -183,10 +178,10 @@ const Create = () => {
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 py-12 px-4 text-white">
       {/* Background grid */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10"></div>
+      <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10"></div>
 
       {/* Animated background patterns */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="fixed inset-0">
         {/* Animated circles */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/5 rounded-full animate-pulse"></div>
         <div
@@ -218,7 +213,7 @@ const Create = () => {
 
         {/* Gradient wave */}
         <svg
-          className="absolute bottom-0 left-0 w-full"
+          className="absolute bottom-0 left-0 w-full h-64"
           viewBox="0 0 1440 320"
           preserveAspectRatio="none"
         >
@@ -235,17 +230,17 @@ const Create = () => {
           </defs>
         </svg>
       </div>
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10"></div>
+      {/* Removed duplicate background grid */}
 
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="container mx-auto relative z-10"
+        className="container mx-auto relative z-10 pb-24"
       >
         <div className="flex items-center justify-center py-8 mb-8">
           <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-70"></div>
+            <div className="absolute -inset-1 bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] rounded-full blur opacity-70"></div>
             <div className="relative">
               <Zap className="h-8 w-8 text-white" />
             </div>
@@ -262,7 +257,7 @@ const Create = () => {
             transition={{ delay: 0.2, duration: 0.5 }}
           >
             <Card className="shadow-xl border border-purple-900 backdrop-blur-sm bg-slate-900/80">
-              <CardHeader className="border-b border-purple-900/30">
+              <CardHeader className="border-b border-purple-900/30 pb-3">
                 <div className="flex items-center">
                   <Video className="h-5 w-5 mr-2 text-purple-400" />
                   <CardTitle className="text-2xl text-white">
@@ -273,40 +268,19 @@ const Create = () => {
                   Describe the video you want to create with AI
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pt-6">
-                <Tabs defaultValue="basic" className="mb-6">
-                  <TabsList className="grid w-full grid-cols-2 bg-slate-800">
-                    <TabsTrigger
-                      value="basic"
-                      className="data-[state=active]:bg-purple-900"
-                    >
-                      Basic
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="advanced"
-                      className="data-[state=active]:bg-purple-900"
-                    >
-                      Advanced
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="basic" className="mt-4">
-                    <VideoForm onSubmit={handleSubmit} isLoading={loading} />
-                  </TabsContent>
-                  <TabsContent value="advanced" className="mt-4">
-                    <div className="p-4 bg-purple-950/50 rounded-md border border-purple-800/50">
-                      <div className="flex items-start">
-                        <Lightbulb className="h-5 w-5 text-yellow-400 mr-2 mt-0.5" />
-                        <p className="text-sm text-purple-300">
-                          Advanced options coming soon! Stay tuned for more
-                          customization features.
-                        </p>
-                      </div>
+              <CardContent className="pt-4 pb-2">
+                {/* Simple text prompt tab */}
+                <div className="mb-3">
+                  <div className="bg-purple-900/30 text-white py-1.5 px-4 rounded-t-md border-b-2 border-purple-500 inline-block">
+                    <div className="flex items-center">
+                      <Sparkles className="h-4 w-4 mr-2 text-purple-300" />
+                      <span>Text Prompt</span>
                     </div>
-                    <div className="mt-4">
-                      <VideoForm onSubmit={handleSubmit} isLoading={loading} />
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                  </div>
+                  <div className="border-t border-purple-900/30 -mt-[1px]"></div>
+                </div>
+                
+                <VideoForm onSubmit={handleSubmit} isLoading={loading} />
 
                 {loading && (
                   <div className="mt-4">
