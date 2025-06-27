@@ -17,30 +17,55 @@ const Home = () => {
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-white">
       {/* Background grid */}
       <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10"></div>
-      
+
       {/* Animated background patterns */}
       <div className="fixed inset-0">
         {/* Animated circles */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/5 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/5 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-        
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/5 rounded-full animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
+
         {/* Floating particles - enhanced with more particles */}
         <div className="absolute top-20 right-40 w-3 h-3 bg-purple-400/30 rounded-full animate-float"></div>
-        <div className="absolute top-40 left-20 w-2 h-2 bg-blue-400/30 rounded-full animate-float" style={{ animationDelay: '1.5s' }}></div>
-        <div className="absolute bottom-40 right-60 w-4 h-4 bg-indigo-400/30 rounded-full animate-float" style={{ animationDelay: '2.2s' }}></div>
-        <div className="absolute bottom-20 left-40 w-3 h-3 bg-violet-400/30 rounded-full animate-float" style={{ animationDelay: '3s' }}></div>
-        <div className="absolute top-60 right-20 w-2 h-2 bg-pink-400/30 rounded-full animate-float" style={{ animationDelay: '2.7s' }}></div>
-        <div className="absolute bottom-60 left-60 w-3 h-3 bg-cyan-400/30 rounded-full animate-float" style={{ animationDelay: '1.8s' }}></div>
-        
+        <div
+          className="absolute top-40 left-20 w-2 h-2 bg-blue-400/30 rounded-full animate-float"
+          style={{ animationDelay: "1.5s" }}
+        ></div>
+        <div
+          className="absolute bottom-40 right-60 w-4 h-4 bg-indigo-400/30 rounded-full animate-float"
+          style={{ animationDelay: "2.2s" }}
+        ></div>
+        <div
+          className="absolute bottom-20 left-40 w-3 h-3 bg-violet-400/30 rounded-full animate-float"
+          style={{ animationDelay: "3s" }}
+        ></div>
+        <div
+          className="absolute top-60 right-20 w-2 h-2 bg-pink-400/30 rounded-full animate-float"
+          style={{ animationDelay: "2.7s" }}
+        ></div>
+        <div
+          className="absolute bottom-60 left-60 w-3 h-3 bg-cyan-400/30 rounded-full animate-float"
+          style={{ animationDelay: "1.8s" }}
+        ></div>
+
         {/* Geometric shapes */}
         <div className="absolute top-1/3 right-1/3 w-64 h-64 border border-purple-500/10 rounded-lg rotate-45 animate-spin-slow"></div>
-        <div className="absolute bottom-1/3 left-1/3 w-64 h-64 border border-blue-500/10 rounded-lg -rotate-45 animate-spin-slow" style={{ animationDelay: '2s' }}></div>
-        
+        <div
+          className="absolute bottom-1/3 left-1/3 w-64 h-64 border border-blue-500/10 rounded-lg -rotate-45 animate-spin-slow"
+          style={{ animationDelay: "2s" }}
+        ></div>
+
         {/* Gradient wave */}
-        <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
-          <path 
-            fill="url(#gradient1)" 
-            fillOpacity="0.15" 
+        <svg
+          className="absolute bottom-0 left-0 w-full"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="url(#gradient1)"
+            fillOpacity="0.15"
             d="M0,192L48,176C96,160,192,128,288,133.3C384,139,480,181,576,186.7C672,192,768,160,864,154.7C960,149,1056,171,1152,165.3C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
           ></path>
           <defs>
@@ -54,19 +79,17 @@ const Home = () => {
 
       <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] text-center">
-       
-            {/* Glowing icon with enhanced glow effect */}
-            <div className="relative mb-6 mx-auto">
-              <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl transform scale-150 animate-pulse"></div>
-              <div className="relative bg-slate-900/50 backdrop-blur-sm p-3 rounded-full inline-block">
-                <Zap className="h-10 w-10 text-purple-400" />
-              </div>
+          {/* Glowing icon with enhanced glow effect */}
+          <div className="relative mb-6 mx-auto">
+            <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl transform scale-150 animate-pulse"></div>
+            <div className="relative bg-slate-900/50 backdrop-blur-sm p-3 rounded-full inline-block">
+              <Zap className="h-10 w-10 text-purple-400" />
             </div>
-           
-            <h1 className="relative text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-              AI Text to Video Shorts Generator
-            </h1>
-    
+          </div>
+
+          <h1 className="relative text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+            AI Text to Video Shorts Generator
+          </h1>
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -89,7 +112,7 @@ const Home = () => {
               <CardContent className="p-8 relative">
                 <div className="absolute -right-12 -top-12 w-24 h-24 bg-blue-600/10 rounded-full"></div>
                 <div className="absolute -left-12 -bottom-12 w-24 h-24 bg-purple-600/10 rounded-full"></div>
-                
+
                 {/* Animated border glow on hover */}
                 <div className="absolute inset-0 border border-purple-500/0 group-hover:border-purple-500/30 rounded-lg transition-all duration-500"></div>
 
@@ -129,7 +152,7 @@ const Home = () => {
               <CardContent className="p-8 relative">
                 <div className="absolute -right-12 -top-12 w-24 h-24 bg-purple-600/10 rounded-full"></div>
                 <div className="absolute -left-12 -bottom-12 w-24 h-24 bg-blue-600/10 rounded-full"></div>
-                
+
                 {/* Animated border glow on hover */}
                 <div className="absolute inset-0 border border-blue-500/0 group-hover:border-blue-500/30 rounded-lg transition-all duration-500"></div>
 
