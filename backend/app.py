@@ -6,14 +6,10 @@ from config import Config
 
 app = Flask(__name__)
 
-# Configure CORS properly
+# Configure CORS to accept requests from ALL origins
 CORS(app, 
      resources={r"/*": {
-         "origins": [
-             "https://shorts-video-alpha.vercel.app",
-             "http://localhost:3000",
-             "http://localhost:5173"
-         ],
+         "origins": "*", # Changed from a list to a wildcard
          "supports_credentials": True,
          "allow_headers": ["Content-Type", "Authorization"],
          "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
