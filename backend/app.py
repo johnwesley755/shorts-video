@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 from flask_cors import CORS
 import os
 from routes.video_routes import video_bp
@@ -6,14 +6,20 @@ from config import Config
 
 app = Flask(__name__)
 
-# Configure CORS with more permissive settings
+# Configure CORS properly
 CORS(app, 
-     origins=["https://shorts-video-alpha.vercel.app", "http://localhost:3000", "http://localhost:5173"],
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+     resources={r"/*": {
+         "origins": [
+             "https://shorts-video-alpha.vercel.app",
+             "http://localhost:3000",
+             "http://localhost:5173"
+         ],
+         "supports_credentials": True,
+         "allow_headers": ["Content-Type", "Authorization"],
+         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+     }})
 
-# Register blueprints
+# Register blueprints with /api/videos prefix
 app.register_blueprint(video_bp, url_prefix='/api/videos')
 
 # Basic error handling
@@ -25,14 +31,6 @@ def not_found(error):
 def server_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
-# Add a route to handle preflight OPTIONS requests
-@app.route('/api/videos/generate', methods=['OPTIONS'])
-def handle_options():
-    response = jsonify({'status': 'ok'})
-    response.headers.add('Access-Control-Allow-Origin', 'https://shorts-video-alpha.vercel.app')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
-    return response
 
 if __name__ == '__main__':
     # Create storage directories if they don't exist
