@@ -27,5 +27,5 @@ RUN mkdir -p storage/temp storage/videos storage/images storage/audio
 # Expose port
 EXPOSE 5000
 
-# Run gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# Run uvicorn
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000"]

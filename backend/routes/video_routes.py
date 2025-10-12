@@ -1,4 +1,7 @@
-from flask import Blueprint, request, jsonify, send_file
+from fastapi import APIRouter, Request, HTTPException, Response, BackgroundTasks
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from typing import Optional, List
 import os
 import uuid
 import json
@@ -10,21 +13,33 @@ from services.video_processing import create_video
 from utils.file_utils import get_video_path, save_video_metadata
 from config import Config
 
-video_bp = Blueprint('videos', __name__)
-
 # Add this import
 from models.video_generator import generate_video_from_text
 
-@video_bp.route('/generate', methods=['POST'])
-def generate_video():
+video_router = APIRouter()
+
+# Define request and response models
+class VideoRequest(BaseModel):
+    text: str
+    enableAudio: Optional[bool] = True
+
+class VideoResponse(BaseModel):
+    id: str
+    videoUrl: str
+    title: str
+    hasAudio: bool
+
+class VideoListItem(BaseModel):
+    id: str
+    title: str
+    url: str
+    createdAt: str
+
+@video_router.post('/generate', response_model=VideoResponse, status_code=201)
+async def generate_video(video_request: VideoRequest, background_tasks: BackgroundTasks):
     try:
-        data = request.get_json()
-        
-        if not data or 'text' not in data:
-            return jsonify({"error": "Text is required"}), 400
-            
-        text = data['text']
-        enable_audio = data.get('enableAudio', True)  # Default to True if not specified
+        text = video_request.text
+        enable_audio = video_request.enableAudio
         
         # Generate a unique ID for this video
         video_id = str(uuid.uuid4())
@@ -85,19 +100,19 @@ def generate_video():
         # Return the URL to access the video
         video_url = f"{Config.API_URL}/videos/{video_id}"
         
-        return jsonify({
+        return {
             "id": video_id,
             "videoUrl": video_url,
             "title": title,
             "hasAudio": enable_audio
-        }), 201
+        }
         
     except Exception as e:
         print(f"Error generating video: {str(e)}")
-        return jsonify({"error": "Failed to generate video"}), 500
+        raise HTTPException(status_code=500, detail="Failed to generate video")
 
-@video_bp.route('/', methods=['GET'])
-def get_videos():
+@video_router.get('/', response_model=List[VideoListItem])
+async def get_videos():
     try:
         videos = []
         metadata_dir = os.path.join(Config.VIDEOS_DIR, "metadata")
@@ -117,22 +132,24 @@ def get_videos():
         # Sort by creation date (newest first)
         videos.sort(key=lambda x: x["createdAt"], reverse=True)
         
-        return jsonify(videos), 200
+        return videos
         
     except Exception as e:
         print(f"Error fetching videos: {str(e)}")
-        return jsonify({"error": "Failed to fetch videos"}), 500
+        raise HTTPException(status_code=500, detail="Failed to fetch videos")
 
-@video_bp.route('/<video_id>', methods=['GET'])
-def get_video(video_id):
+@video_router.get('/{video_id}')
+async def get_video(video_id: str):
     try:
         video_path = get_video_path(video_id)
         
         if not video_path or not os.path.exists(video_path):
-            return jsonify({"error": "Video not found"}), 404
+            raise HTTPException(status_code=404, detail="Video not found")
             
-        return send_file(video_path, mimetype='video/mp4')
+        return FileResponse(video_path, media_type='video/mp4')
         
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Error fetching video {video_id}: {str(e)}")
-        return jsonify({"error": "Failed to fetch video"}), 500
+        raise HTTPException(status_code=500, detail="Failed to fetch video")

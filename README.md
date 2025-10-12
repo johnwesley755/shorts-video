@@ -21,6 +21,7 @@ Shorts is a powerful AI-powered platform that transforms text descriptions into 
 ## 🛠️ Tech Stack
 
 ### Frontend 🖥️
+
 - ⚛️ React with TypeScript
 - ⚡ Vite for fast development
 - 🎨 Tailwind CSS for styling
@@ -28,6 +29,7 @@ Shorts is a powerful AI-powered platform that transforms text descriptions into 
 - 🧩 Shadcn UI components
 
 ### Backend 🔧
+
 - 🐍 Python with Flask
 - 🤖 AI video generation using pre-trained model
 - 🔐 RESTful API architecture
@@ -35,6 +37,7 @@ Shorts is a powerful AI-powered platform that transforms text descriptions into 
 ## 📋 Getting Started
 
 ### Prerequisites 📝
+
 - Node.js (v16+)
 - Python (v3.8+)
 - npm or yarn
@@ -43,12 +46,14 @@ Shorts is a powerful AI-powered platform that transforms text descriptions into 
 ### Installation 💻
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/yourusername/shorts.git
 cd shorts
 ```
 
 2. Install dependencies for both frontend and backend
+
 ```bash
 # Install frontend dependencies
 cd frontend
@@ -60,6 +65,7 @@ pip install -r requirements.txt
 ```
 
 3. Set up environment variables
+
 ```bash
 # In the backend directory
 cp .env.example .env
@@ -67,6 +73,7 @@ cp .env.example .env
 ```
 
 4. Start the development servers
+
 ```bash
 # Start backend (from backend directory)
 python app.py

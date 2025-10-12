@@ -1,40 +1,49 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import os
-from routes.video_routes import video_bp
+from routes.video_routes import video_router
 from config import Config
 
-app = Flask(__name__)
+app = FastAPI(title="Shorts Video API")
 
-# Configure CORS to accept requests from ALL origins
-CORS(app, 
-     resources={r"/*": {
-         "origins": "*", # Changed from a list to a wildcard
-         "supports_credentials": True,
-         "allow_headers": ["Content-Type", "Authorization"],
-         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-     }})
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Register blueprints with /api/videos prefix
-app.register_blueprint(video_bp, url_prefix='/api/videos')
+# Register routes
+app.include_router(video_router, prefix="/api/videos")
 
 # Basic error handling
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({"error": "Not found"}), 404
+@app.exception_handler(404)
+async def not_found_handler(request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={"error": "Not found"}
+    )
 
-@app.errorhandler(500)
-def server_error(error):
-    return jsonify({"error": "Internal server error"}), 500
+@app.exception_handler(500)
+async def server_error_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error"}
+    )
 
-
-if __name__ == '__main__':
-    # Create storage directories if they don't exist
+# Create storage directories on startup
+@app.on_event("startup")
+async def startup_event():
     os.makedirs(Config.TEMP_DIR, exist_ok=True)
     os.makedirs(Config.VIDEOS_DIR, exist_ok=True)
     os.makedirs(Config.IMAGES_DIR, exist_ok=True)
     os.makedirs(Config.AUDIO_DIR, exist_ok=True)
-    
+
+if __name__ == '__main__':
+    import uvicorn
     # Use environment variables for port if available (for Render deployment)
     port = int(os.environ.get('PORT', Config.PORT))
-    app.run(debug=Config.DEBUG, host='0.0.0.0', port=port)
+    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=Config.DEBUG)
