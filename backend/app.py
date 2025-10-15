@@ -7,10 +7,17 @@ from config import Config
 
 app = FastAPI(title="Shorts Video API")
 
-# Configure CORS
+# Define the list of allowed origins (frontends)
+origins = [
+    "https://shorts-video-alpha.vercel.app",  # Your frontend URL
+    "http://localhost:3000",                  # For local development
+    "http://localhost:5173",                  # For local development (e.g., Vite)
+]
+
+# Configure CORS with the specific origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
