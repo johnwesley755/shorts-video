@@ -9,7 +9,7 @@ app = FastAPI(title="Shorts Video API")
 
 # Define the list of allowed origins (frontends)
 origins = [
-    "https://shorts-video-alpha.vercel.app",  # Your frontend URL
+    "https://shorts-video-six.vercel.app/",  # Your frontend URL
     "http://localhost:3000",                  # For local development
     "http://localhost:5173",                  # For local development (e.g., Vite)
 ]
