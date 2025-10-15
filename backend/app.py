@@ -19,6 +19,11 @@ app.add_middleware(
 # Register routes
 app.include_router(video_router, prefix="/api/videos")
 
+# Add the new root endpoint
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Shorts Video API"}
+
 # Basic error handling
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
