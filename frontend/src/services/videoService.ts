@@ -7,7 +7,7 @@ const isLocalhost =
 const API_URL = isLocalhost
   ? "http://localhost:5000/api"
   : import.meta.env.VITE_API_URL ||
-    "https://shorts-video-0mo7.onrender.com/api";
+    "https://shorts-video-l6mf.onrender.com/api";
 
 export interface VideoData {
   id: string;
