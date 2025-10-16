@@ -1,21 +1,39 @@
-// /api/proxy.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import axios from "axios";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const { endpoint } = req.query;
+
+  if (!endpoint || typeof endpoint !== "string") {
+    return res.status(400).json({ error: "Missing endpoint query parameter" });
+  }
+
   try {
-    const endpoint = req.query.endpoint || "";
-
-    const response = await axios({
-      method: req.method as any,
-      url: `https://huggingface.co/spaces/johnwesley756/shorts-video/api/${endpoint}`,
-      data: req.body,
-      headers: { "Content-Type": "application/json" },
+    if (req.method === "POST") {
+      const response = await axios.post(
+        `https://huggingface.co/spaces/johnwesley756/shorts-video/api/${endpoint}`,
+        req.body,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            // If your Space requires authorization, add it here:
+            // Authorization: `Bearer ${process.env.HF_API_KEY}`
+          },
+        }
+      );
+      return res.status(200).json(response.data);
+    } else if (req.method === "GET") {
+      const response = await axios.get(
+        `https://huggingface.co/spaces/johnwesley756/shorts-video/api/${endpoint}`
+      );
+      return res.status(200).json(response.data);
+    } else {
+      return res.status(405).json({ error: "Method not allowed" });
+    }
+  } catch (err: any) {
+    console.error(err);
+    return res.status(err.response?.status || 500).json({
+      error: err.response?.data || err.message,
     });
-
-    res.status(200).json(response.data);
-  } catch (error: any) {
-    console.error("Proxy error:", error.message || error);
-    res.status(500).json({ error: "Failed to call Space API" });
   }
 }
