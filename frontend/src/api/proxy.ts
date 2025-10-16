@@ -9,13 +9,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // Use the correct API endpoint URL for your Hugging Face Space
+    const baseUrl = "https://johnwesley756-shorts-video.hf.space/api";
+    
     if (req.method === "POST") {
+      console.log(`Forwarding POST request to ${baseUrl}/${endpoint}`);
       const response = await axios.post(
-        `https://johnwesley756-shorts-video.hf.space/api/${endpoint}`,
+        `${baseUrl}/${endpoint}`,
         req.body,
         {
           headers: {
             "Content-Type": "application/json",
+            "Accept": "application/json",
             // If your Space requires authorization, add it here:
             // Authorization: `Bearer ${process.env.HF_API_KEY}`
           },
@@ -23,8 +28,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       );
       return res.status(200).json(response.data);
     } else if (req.method === "GET") {
+      console.log(`Forwarding GET request to ${baseUrl}/${endpoint}`);
       const response = await axios.get(
-        `https://johnwesley756-shorts-video.hf.space/api/${endpoint}`
+        `${baseUrl}/${endpoint}`
       );
       return res.status(200).json(response.data);
     } else {
