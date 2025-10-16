@@ -25,7 +25,7 @@ app = FastAPI(title="Shorts Video API", lifespan=lifespan)
 origins = [
     "https://shorts-video-six.vercel.app",
     "https://shorts-video-alpha.vercel.app",
-    "https://shorts-video-l6mf.onrender.com",
+    "https://huggingface.co/spaces/johnwesley756/shorts-video",
     "http://localhost:3000",
     "http://localhost:5173",
 ]

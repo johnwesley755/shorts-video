@@ -10,9 +10,10 @@ class Config:
     HOST = os.getenv('HOST', '0.0.0.0')
     PORT = int(os.getenv('PORT', 5000))
     
-    # Storage paths
+    # Storage paths (fixed)
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    STORAGE_DIR = os.path.join(os.path.dirname(BASE_DIR), 'storage')
+    # This correctly points to /app/storage, which is a valid path
+    STORAGE_DIR = os.path.join(BASE_DIR, 'storage')
     TEMP_DIR = os.path.join(STORAGE_DIR, 'temp')
     VIDEOS_DIR = os.path.join(STORAGE_DIR, 'videos')
     IMAGES_DIR = os.path.join(STORAGE_DIR, 'images')
