@@ -1,7 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import os
+import pathlib
 from contextlib import asynccontextmanager
 from routes.video_routes import video_router
 from config import Config
@@ -15,6 +17,13 @@ async def lifespan(app: FastAPI):
     os.makedirs(Config.VIDEOS_DIR, exist_ok=True)
     os.makedirs(Config.IMAGES_DIR, exist_ok=True)
     os.makedirs(Config.AUDIO_DIR, exist_ok=True)
+    
+    # Create static directories if they don't exist
+    static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+    os.makedirs(static_dir, exist_ok=True)
+    static_assets_dir = os.path.join(static_dir, "assets")
+    os.makedirs(static_assets_dir, exist_ok=True)
+    
     yield
     # Code to run on shutdown (if any)
     print("Shutting down...")
@@ -38,6 +47,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files directory if it exists
+static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+if os.path.exists(static_dir):
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+    if os.path.exists(os.path.join(static_dir, "assets")):
+        app.mount("/assets", StaticFiles(directory=os.path.join(static_dir, "assets")), name="static_assets")
 
 # Register routes
 app.include_router(video_router, prefix="/api/videos")
