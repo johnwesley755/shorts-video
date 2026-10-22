@@ -61,7 +61,13 @@ const Library = () => {
     const fetchVideos = async () => {
       try {
         const data = await getVideos();
-        setVideos(data);
+        if (Array.isArray(data)) {
+          setVideos(data);
+        } else {
+          console.warn("Expected array of videos from getVideos, received:", data);
+          setVideos([]);
+          setError("Failed to load videos: invalid response format");
+        }
       } catch (err) {
         setError("Failed to load videos");
         console.error(err);
@@ -73,19 +79,22 @@ const Library = () => {
     fetchVideos();
   }, []);
 
-  // Filter videos based on search term
-  const filteredVideos = videos.filter((video) =>
-    video.title.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter videos based on search term (defensively guard against non-array state)
+  const videoList = Array.isArray(videos) ? videos : [];
+  const filteredVideos = videoList.filter((video) =>
+    (video?.title || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Sort videos based on selected option
   const sortedVideos = [...filteredVideos].sort((a, b) => {
+    const timeA = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const timeB = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
     if (sortBy === "newest") {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return timeB - timeA;
     } else if (sortBy === "oldest") {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return timeA - timeB;
     } else if (sortBy === "title") {
-      return a.title.localeCompare(b.title);
+      return (a?.title || "").localeCompare(b?.title || "");
     }
     return 0;
   });

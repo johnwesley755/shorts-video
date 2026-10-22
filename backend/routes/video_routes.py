@@ -10,7 +10,8 @@ from services.text_processing import process_text
 from services.audio_processing import generate_audio
 from services.image_processing import generate_images
 from services.video_processing import create_video
-from utils.file_utils import get_video_path, save_video_metadata
+from utils.file_utils import get_video_path, save_video_metadata, is_valid_video_id
+from utils.validation import validate_text_input
 from config import Config
 
 # Add this import
@@ -37,8 +38,13 @@ class VideoListItem(BaseModel):
 
 @video_router.post('/generate', response_model=VideoResponse, status_code=201)
 async def generate_video(video_request: VideoRequest, background_tasks: BackgroundTasks):
+    # Validate text input to prevent DoS and empty prompt generation
+    is_valid, error_msg = validate_text_input(video_request.text)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+
     try:
-        text = video_request.text
+        text = video_request.text.strip()
         enable_audio = video_request.enableAudio
         
         # Generate a unique ID for this video
@@ -111,6 +117,7 @@ async def generate_video(video_request: VideoRequest, background_tasks: Backgrou
         print(f"Error generating video: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to generate video")
 
+@video_router.get('', response_model=List[VideoListItem])
 @video_router.get('/', response_model=List[VideoListItem])
 async def get_videos():
     try:
@@ -140,6 +147,9 @@ async def get_videos():
 
 @video_router.get('/{video_id}')
 async def get_video(video_id: str):
+    if not is_valid_video_id(video_id):
+        raise HTTPException(status_code=400, detail="Invalid video ID format")
+
     try:
         video_path = get_video_path(video_id)
         

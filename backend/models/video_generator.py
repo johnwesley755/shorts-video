@@ -161,92 +161,88 @@ def generate_video_from_text(text, output_path, num_frames=5, height=512, width=
             
             frames = interpolated_frames
         
-        # Save as video with higher quality
-        temp_video_path = output_path
-        if enable_audio:
-            # Use a temporary file for the silent video
-            temp_video_path = os.path.join(tempfile.gettempdir(), "temp_video.mp4")
+        # Use an isolated temporary directory for intermediate files to prevent race conditions (CWE-377)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_video_path = output_path
+            if enable_audio:
+                # Use an isolated temporary file for the silent video
+                temp_video_path = os.path.join(temp_dir, "temp_video.mp4")
+                
+            logger.info(f"Saving video to: {temp_video_path}")
+            # Use higher quality settings for the video
+            imageio.mimsave(temp_video_path, frames, fps=fps, quality=9, macro_block_size=1)
             
-        logger.info(f"Saving video to: {temp_video_path}")
-        # Use higher quality settings for the video
-        imageio.mimsave(temp_video_path, frames, fps=fps, quality=9, macro_block_size=1)
-        
-        # Generate audio narration if enabled
-        if enable_audio:
-            try:
-                logger.info("Generating audio narration...")
-                audio_path = os.path.join(tempfile.gettempdir(), "narration.mp3")
-                
-                # Generate speech from the prompt text
-                tts = gTTS(text=text, lang='en', slow=False)
-                tts.save(audio_path)
-                
-                # Combine video and audio with better ffmpeg settings
-                logger.info("Combining video and audio...")
-                
-                # Check audio duration
-                audio_info_cmd = [
-                    'ffprobe', '-v', 'error', '-show_entries', 'format=duration', 
-                    '-of', 'default=noprint_wrappers=1:nokey=1', audio_path
-                ]
-                
+            # Generate audio narration if enabled
+            if enable_audio:
                 try:
-                    audio_duration = float(subprocess.check_output(audio_info_cmd).decode('utf-8').strip())
-                    logger.info(f"Audio duration: {audio_duration} seconds")
+                    logger.info("Generating audio narration...")
+                    audio_path = os.path.join(temp_dir, "narration.mp3")
                     
-                    # If audio is shorter than 30 seconds, loop it
-                    if audio_duration < 30:
-                        logger.info("Audio is shorter than 30 seconds, creating looped version")
-                        looped_audio_path = os.path.join(tempfile.gettempdir(), "looped_narration.mp3")
+                    # Generate speech from the prompt text
+                    tts = gTTS(text=text, lang='en', slow=False)
+                    tts.save(audio_path)
+                    
+                    # Combine video and audio with better ffmpeg settings
+                    logger.info("Combining video and audio...")
+                    
+                    # Check audio duration
+                    audio_info_cmd = [
+                        'ffprobe', '-v', 'error', '-show_entries', 'format=duration', 
+                        '-of', 'default=noprint_wrappers=1:nokey=1', audio_path
+                    ]
+                    
+                    try:
+                        audio_duration = float(subprocess.check_output(audio_info_cmd).decode('utf-8').strip())
+                        logger.info(f"Audio duration: {audio_duration} seconds")
                         
-                        # Create a filter to loop audio to at least 30 seconds
-                        loop_count = math.ceil(30 / audio_duration)
-                        
-                        loop_cmd = [
-                            'ffmpeg', '-y',
-                            '-i', audio_path,
-                            '-filter_complex', f'aloop=loop={loop_count}:size=1:start=0',
-                            '-t', '30',  # Limit to exactly 30 seconds
-                            looped_audio_path
-                        ]
-                        
-                        subprocess.run(loop_cmd, check=True)
-                        
-                        # Use the looped audio instead
-                        audio_path = looped_audio_path
+                        # If audio is shorter than 30 seconds, loop it
+                        if audio_duration < 30:
+                            logger.info("Audio is shorter than 30 seconds, creating looped version")
+                            looped_audio_path = os.path.join(temp_dir, "looped_narration.mp3")
+                            
+                            # Create a filter to loop audio to at least 30 seconds
+                            loop_count = math.ceil(30 / audio_duration)
+                            
+                            loop_cmd = [
+                                'ffmpeg', '-y',
+                                '-i', audio_path,
+                                '-filter_complex', f'aloop=loop={loop_count}:size=1:start=0',
+                                '-t', '30',  # Limit to exactly 30 seconds
+                                looped_audio_path
+                            ]
+                            
+                            subprocess.run(loop_cmd, check=True)
+                            
+                            # Use the looped audio instead
+                            audio_path = looped_audio_path
+                    except Exception as e:
+                        logger.warning(f"Could not check audio duration: {str(e)}")
+                    
+                    # Use ffmpeg to combine video and audio - ensure output is exactly 30 seconds
+                    ffmpeg_cmd = [
+                        'ffmpeg', '-y',
+                        '-i', temp_video_path,
+                        '-i', audio_path,
+                        '-c:v', 'libx264',  # Use better codec
+                        '-preset', 'medium',  # Better quality preset
+                        '-crf', '23',  # Better quality setting
+                        '-c:a', 'aac',
+                        '-b:a', '192k',  # Better audio quality
+                        '-t', '30',  # Force exactly 30 seconds
+                        output_path
+                    ]
+                    
+                    subprocess.run(ffmpeg_cmd, check=True)
+                    logger.info(f"Video with narration saved to: {output_path}")
                 except Exception as e:
-                    logger.warning(f"Could not check audio duration: {str(e)}")
-                
-                # Use ffmpeg to combine video and audio - ensure output is exactly 30 seconds
-                ffmpeg_cmd = [
-                    'ffmpeg', '-y',
-                    '-i', temp_video_path,
-                    '-i', audio_path,
-                    '-c:v', 'libx264',  # Use better codec
-                    '-preset', 'medium',  # Better quality preset
-                    '-crf', '23',  # Better quality setting
-                    '-c:a', 'aac',
-                    '-b:a', '192k',  # Better audio quality
-                    '-t', '30',  # Force exactly 30 seconds
-                    output_path
-                ]
-                
-                subprocess.run(ffmpeg_cmd, check=True)
-                logger.info(f"Video with narration saved to: {output_path}")
-                
-                # Clean up temporary files
-                if os.path.exists(temp_video_path):
-                    os.remove(temp_video_path)
-                if os.path.exists(audio_path):
-                    os.remove(audio_path)
-            except Exception as e:
-                logger.error(f"Error adding narration: {str(e)}")
-                # If audio fails, just use the video without audio
-                if os.path.exists(temp_video_path) and temp_video_path != output_path:
-                    os.rename(temp_video_path, output_path)
-        
-        return output_path
-        
+                    logger.error(f"Error adding narration: {str(e)}")
+                    # If audio fails, just copy the video without audio
+                    if os.path.exists(temp_video_path) and temp_video_path != output_path:
+                        import shutil
+                        shutil.copy2(temp_video_path, output_path)
+            
+            return output_path
+            
     except Exception as e:
         logger.error(f"Error in video generation: {str(e)}")
         # Use a faster fallback video generation
@@ -328,54 +324,50 @@ def generate_fallback_video(output_path, num_frames=30, height=512, width=512, e
             # Convert to numpy array and append to frames
             frames.append(np.array(img))
         
-        # Save as video
-        temp_video_path = output_path
-        if enable_audio:
-            # Use a temporary file for the silent video
-            temp_video_path = os.path.join(tempfile.gettempdir(), "temp_fallback.mp4")
+        # Use an isolated temporary directory for intermediate files to prevent race conditions (CWE-377)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_video_path = output_path
+            if enable_audio:
+                # Use an isolated temporary file for the silent video
+                temp_video_path = os.path.join(temp_dir, "temp_fallback.mp4")
+                
+            logger.info(f"Saving fallback video to: {temp_video_path}")
+            imageio.mimsave(temp_video_path, frames, fps=12)  # Higher FPS for smoother animation
             
-        logger.info(f"Saving fallback video to: {temp_video_path}")
-        imageio.mimsave(temp_video_path, frames, fps=12)  # Higher FPS for smoother animation
-        
-        # Generate audio narration if enabled
-        if enable_audio:
-            try:
-                logger.info("Generating audio narration for fallback...")
-                audio_path = os.path.join(tempfile.gettempdir(), "fallback_narration.mp3")
-                
-                # Generate speech from the prompt text
-                tts = gTTS(text=text, lang='en', slow=False)
-                tts.save(audio_path)
-                
-                # Combine video and audio
-                logger.info("Combining fallback video and audio...")
-                
-                # Use ffmpeg to combine video and audio
-                ffmpeg_cmd = [
-                    'ffmpeg', '-y',
-                    '-i', temp_video_path,
-                    '-i', audio_path,
-                    '-c:v', 'copy',
-                    '-c:a', 'aac',
-                    '-shortest',  # End when the shortest input ends
-                    output_path
-                ]
-                
-                subprocess.run(ffmpeg_cmd, check=True)
-                logger.info(f"Fallback video with narration saved to: {output_path}")
-                
-                # Clean up temporary files
-                if os.path.exists(temp_video_path):
-                    os.remove(temp_video_path)
-                if os.path.exists(audio_path):
-                    os.remove(audio_path)
-            except Exception as e:
-                logger.error(f"Error adding narration to fallback: {str(e)}")
-                # If audio fails, just use the video without audio
-                if os.path.exists(temp_video_path) and temp_video_path != output_path:
-                    os.rename(temp_video_path, output_path)
-        
-        return output_path
+            # Generate audio narration if enabled
+            if enable_audio:
+                try:
+                    logger.info("Generating audio narration for fallback...")
+                    audio_path = os.path.join(temp_dir, "fallback_narration.mp3")
+                    
+                    # Generate speech from the prompt text
+                    tts = gTTS(text=text, lang='en', slow=False)
+                    tts.save(audio_path)
+                    
+                    # Combine video and audio
+                    logger.info("Combining fallback video and audio...")
+                    
+                    # Use ffmpeg to combine video and audio
+                    ffmpeg_cmd = [
+                        'ffmpeg', '-y',
+                        '-i', temp_video_path,
+                        '-i', audio_path,
+                        '-c:v', 'copy',
+                        '-c:a', 'aac',
+                        '-shortest',  # End when the shortest input ends
+                        output_path
+                    ]
+                    
+                    subprocess.run(ffmpeg_cmd, check=True)
+                    logger.info(f"Fallback video with narration saved to: {output_path}")
+                except Exception as e:
+                    logger.error(f"Error adding narration to fallback: {str(e)}")
+                    # If audio fails, just copy the video without audio
+                    if os.path.exists(temp_video_path) and temp_video_path != output_path:
+                        import shutil
+                        shutil.copy2(temp_video_path, output_path)
+            
+            return output_path
     except Exception as e:
         logger.error(f"Error generating fallback video: {str(e)}")
         return output_path
