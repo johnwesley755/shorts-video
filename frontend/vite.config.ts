@@ -13,8 +13,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      "/api": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+      },
       "/api/proxy": {
-        target: "https://johnwesley756-shorts-video.hf.space/api",
+        target: "http://localhost:5000/api",
         changeOrigin: true,
         rewrite: (reqPath) => {
           const url = new URL(reqPath, "http://localhost");

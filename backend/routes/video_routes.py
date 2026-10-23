@@ -1,20 +1,14 @@
 from fastapi import APIRouter, Request, HTTPException, Response, BackgroundTasks
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 import os
 import uuid
 import json
 from datetime import datetime
-from services.text_processing import process_text
-from services.audio_processing import generate_audio
-from services.image_processing import generate_images
-from services.video_processing import create_video
 from utils.file_utils import get_video_path, save_video_metadata, is_valid_video_id
 from utils.validation import validate_text_input
 from config import Config
-
-# Add this import
 from models.video_generator import generate_video_from_text
 
 video_router = APIRouter()
@@ -24,74 +18,54 @@ class VideoRequest(BaseModel):
     text: str
     enableAudio: Optional[bool] = True
 
+class SceneItem(BaseModel):
+    order: int
+    text: str
+    visualPrompt: str
+    imageFilename: Optional[str] = None
+    imageUrl: Optional[str] = None
+
 class VideoResponse(BaseModel):
     id: str
     videoUrl: str
     title: str
     hasAudio: bool
+    scenes: Optional[List[SceneItem]] = []
 
 class VideoListItem(BaseModel):
     id: str
     title: str
     url: str
+    thumbnailUrl: Optional[str] = None
     createdAt: str
+    scenesCount: Optional[int] = 0
 
 @video_router.post('/generate', response_model=VideoResponse, status_code=201)
 async def generate_video(video_request: VideoRequest, background_tasks: BackgroundTasks):
-    # Validate text input to prevent DoS and empty prompt generation
     is_valid, error_msg = validate_text_input(video_request.text)
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_msg)
 
     try:
         text = video_request.text.strip()
-        enable_audio = video_request.enableAudio
+        enable_audio = video_request.enableAudio if video_request.enableAudio is not None else True
         
-        # Generate a unique ID for this video
         video_id = str(uuid.uuid4())
-        
-        # Process text to get a concise prompt
-        segments = process_text(text)
-        main_prompt = segments[0] if segments else text
-        
-        # Generate video directly from text
         video_filename = f"{video_id}.mp4"
-        temp_video_path = os.path.join(Config.TEMP_DIR, f"temp_{video_filename}")
         final_video_path = os.path.join(Config.VIDEOS_DIR, video_filename)
         
-        # Use the Hugging Face model to generate the video
-        generate_video_from_text(main_prompt, temp_video_path)
-        
-        # Generate audio narration if enabled
-        if enable_audio:
-            # Generate audio from the text
-            audio_filename = f"{video_id}.mp3"
-            audio_path = os.path.join(Config.AUDIO_DIR, audio_filename)
-            generate_audio(text, audio_path)
-            
-            # Combine audio with video
-            import subprocess
-            subprocess.run([
-                'ffmpeg',
-                '-i', temp_video_path,
-                '-i', audio_path,
-                '-c:v', 'copy',
-                '-c:a', 'aac',
-                '-map', '0:v:0',
-                '-map', '1:a:0',
-                '-shortest',
-                final_video_path
-            ], check=True)
-            
-            # Clean up temporary files
-            if os.path.exists(temp_video_path):
-                os.remove(temp_video_path)
-        else:
-            # Just use the video without audio
-            import shutil
-            shutil.move(temp_video_path, final_video_path)
-        
-        # Save metadata
+        # Execute the multi-modal AI video synthesis pipeline
+        _, scenes_meta = generate_video_from_text(
+            text=text,
+            output_path=final_video_path,
+            enable_audio=enable_audio
+        )
+
+        # Enrich scene metadata with public image URLs
+        for s in scenes_meta:
+            if s.get("imageFilename"):
+                s["imageUrl"] = f"{Config.API_URL}/videos/images/{s['imageFilename']}"
+
         title = text[:50] + "..." if len(text) > 50 else text
         metadata = {
             "id": video_id,
@@ -99,23 +73,25 @@ async def generate_video(video_request: VideoRequest, background_tasks: Backgrou
             "text": text,
             "hasAudio": enable_audio,
             "createdAt": datetime.now().isoformat(),
-            "filename": video_filename
+            "filename": video_filename,
+            "scenes": scenes_meta,
+            "thumbnailUrl": scenes_meta[0]["imageUrl"] if scenes_meta else None
         }
         save_video_metadata(video_id, metadata)
         
-        # Return the URL to access the video
         video_url = f"{Config.API_URL}/videos/{video_id}"
         
         return {
             "id": video_id,
             "videoUrl": video_url,
             "title": title,
-            "hasAudio": enable_audio
+            "hasAudio": enable_audio,
+            "scenes": scenes_meta
         }
         
     except Exception as e:
         print(f"Error generating video: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to generate video")
+        raise HTTPException(status_code=500, detail=f"Failed to generate video: {str(e)}")
 
 @video_router.get('', response_model=List[VideoListItem])
 @video_router.get('/', response_model=List[VideoListItem])
@@ -127,23 +103,44 @@ async def get_videos():
         if os.path.exists(metadata_dir):
             for filename in os.listdir(metadata_dir):
                 if filename.endswith('.json'):
-                    with open(os.path.join(metadata_dir, filename), 'r') as f:
-                        metadata = json.load(f)
-                        videos.append({
-                            "id": metadata["id"],
-                            "title": metadata["title"],
-                            "url": f"{Config.API_URL}/videos/{metadata['id']}",
-                            "createdAt": metadata["createdAt"]
-                        })
+                    try:
+                        with open(os.path.join(metadata_dir, filename), 'r', encoding='utf-8') as f:
+                            metadata = json.load(f)
+                            thumbnail = metadata.get("thumbnailUrl")
+                            if not thumbnail and metadata.get("scenes"):
+                                first_scene = metadata["scenes"][0]
+                                if first_scene.get("imageFilename"):
+                                    thumbnail = f"{Config.API_URL}/videos/images/{first_scene['imageFilename']}"
+
+                            videos.append({
+                                "id": metadata["id"],
+                                "title": metadata["title"],
+                                "url": f"{Config.API_URL}/videos/{metadata['id']}",
+                                "thumbnailUrl": thumbnail,
+                                "createdAt": metadata["createdAt"],
+                                "scenesCount": len(metadata.get("scenes", []))
+                            })
+                    except Exception as e:
+                        print(f"Error reading metadata {filename}: {e}")
         
-        # Sort by creation date (newest first)
         videos.sort(key=lambda x: x["createdAt"], reverse=True)
-        
         return videos
         
     except Exception as e:
         print(f"Error fetching videos: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch videos")
+
+@video_router.get('/images/{filename}')
+async def get_scene_image(filename: str):
+    """Serve generated scene AI images with path traversal protection"""
+    clean_filename = os.path.basename(filename)
+    images_dir = os.path.realpath(Config.IMAGES_DIR)
+    image_path = os.path.realpath(os.path.join(images_dir, clean_filename))
+
+    if not image_path.startswith(images_dir + os.sep) or not os.path.exists(image_path):
+        raise HTTPException(status_code=404, detail="Image not found")
+
+    return FileResponse(image_path, media_type="image/jpeg")
 
 @video_router.get('/{video_id}')
 async def get_video(video_id: str):
@@ -156,7 +153,14 @@ async def get_video(video_id: str):
         if not video_path or not os.path.exists(video_path):
             raise HTTPException(status_code=404, detail="Video not found")
             
-        return FileResponse(video_path, media_type='video/mp4')
+        return FileResponse(
+            video_path,
+            media_type='video/mp4',
+            headers={
+                "Accept-Ranges": "bytes",
+                "Content-Disposition": f"inline; filename={video_id}.mp4"
+            }
+        )
         
     except HTTPException:
         raise

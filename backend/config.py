@@ -24,4 +24,6 @@ class Config:
     
     # Model configurations
     TTS_MODEL = os.getenv('TTS_MODEL', 'facebook/fastspeech2-en-ljspeech')
-    IMAGE_MODEL = os.getenv('IMAGE_MODEL', 'stabilityai/stable-diffusion-2-1')
+    IMAGE_MODEL = os.getenv('IMAGE_MODEL', 'stabilityai/sd-turbo')
+    INFERENCE_MODE = os.getenv('INFERENCE_MODE', 'auto')  # 'auto', 'serverless', 'local'
+    POLLINATIONS_API_KEY = os.getenv('POLLINATIONS_API_KEY', '')

@@ -1,96 +1,96 @@
 import torch
-from transformers import AutoTokenizer, pipeline
-from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
+import logging
+from transformers import pipeline
+from diffusers import AutoPipelineForText2Image, StableDiffusionPipeline, DPMSolverMultistepScheduler, DiffusionPipeline
 from config import Config
 
-# Cache for loaded models
+logger = logging.getLogger(__name__)
+
+# Cache for loaded models in memory
 _models_cache = {}
 
 def get_tts_model():
     """
-    Load and return the text-to-speech model
+    Load and return the text-to-speech pipeline
     """
     cache_key = 'tts'
     if cache_key not in _models_cache:
-        print(f"Loading TTS model: facebook/tts-transformer")
-        # Using a TTS pipeline instead of direct model
-        tts = pipeline("text-to-speech", model="facebook/tts-transformer")
-        _models_cache[cache_key] = tts
+        model_name = Config.TTS_MODEL
+        logger.info(f"Loading pre-trained TTS pipeline: {model_name}")
+        try:
+            tts = pipeline("text-to-speech", model=model_name)
+            _models_cache[cache_key] = tts
+        except Exception as e:
+            logger.warning(f"Could not load local TTS model '{model_name}': {e}. Falling back to gTTS engine.")
+            return None
     
-    return _models_cache[cache_key]
+    return _models_cache.get(cache_key)
 
-def get_image_generation_model():
+def get_image_generation_model(model_id=None):
     """
-    Load and return the image generation model
+    Load and return a pre-trained Diffusion model.
+    Defaults to stabilityai/sd-turbo (1-step inference for ultra-fast generation on CPU/GPU)
     """
     cache_key = 'image_gen'
     if cache_key not in _models_cache:
-        print(f"Loading image generation model: stabilityai/stable-diffusion-2-1")
-        
-        # Use CUDA if available
+        model_id = model_id or Config.IMAGE_MODEL
         device = "cuda" if torch.cuda.is_available() else "cpu"
+        logger.info(f"Loading pre-trained diffusion model: {model_id} on {device}")
         
-        # Using Stability AI's Stable Diffusion 2.1 for high-quality image generation
-        model_id = "stabilityai/stable-diffusion-2-1"
-        
-        # Load the model with optimized settings
-        pipe = StableDiffusionPipeline.from_pretrained(
-            model_id,
-            torch_dtype=torch.float16 if device == "cuda" else torch.float32,
-            safety_checker=None  # Disable safety checker for faster generation
-        )
-        
-        # Use DPM-Solver++ scheduler for faster and better quality generation
-        pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
-        pipe = pipe.to(device)
-        
-        # Enable memory efficient attention if using CUDA
-        if device == "cuda":
+        try:
+            # Use AutoPipelineForText2Image for modern SD / SD-Turbo / SDXL compatibility
+            torch_dtype = torch.float16 if device == "cuda" else torch.float32
+            pipe = AutoPipelineForText2Image.from_pretrained(
+                model_id,
+                torch_dtype=torch_dtype,
+                variant="fp16" if device == "cuda" else None,
+                safety_checker=None
+            )
+            pipe = pipe.to(device)
             pipe.enable_attention_slicing()
-            # Enable xformers memory efficient attention if available
-            try:
-                pipe.enable_xformers_memory_efficient_attention()
-            except:
-                pass
-        
-        _models_cache[cache_key] = pipe
-    
+            _models_cache[cache_key] = pipe
+            logger.info(f"Successfully loaded diffusion model: {model_id}")
+        except Exception as e:
+            logger.error(f"Failed to load local diffusion model '{model_id}': {e}")
+            raise e
+            
     return _models_cache[cache_key]
 
 def get_text_summarization_model():
     """
-    Load and return the text summarization model
+    Load and return the pre-trained NLP transformer for text segmentation & summarization
     """
     cache_key = 'summarizer'
     if cache_key not in _models_cache:
-        print(f"Loading text summarization model: facebook/bart-large-cnn")
-        
-        # Using Facebook's BART model for text summarization
-        summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-        _models_cache[cache_key] = summarizer
+        logger.info("Loading pre-trained NLP model: facebook/bart-large-cnn")
+        try:
+            summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+            _models_cache[cache_key] = summarizer
+        except Exception as e:
+            logger.warning(f"Could not load BART summarizer: {e}")
+            return None
     
     return _models_cache[cache_key]
 
-
 def get_text_to_video_model():
     """
-    Load and return the text-to-video model from Hugging Face
+    Load and return the text-to-video pre-trained model (damo-vilab/text-to-video-ms-1.7b)
     """
     cache_key = 'text_to_video'
     if cache_key not in _models_cache:
-        print("Loading text-to-video model: damo-vilab/text-to-video-ms-1.7b")
-        
-        # Use CUDA if available
+        logger.info("Loading pre-trained text-to-video model: damo-vilab/text-to-video-ms-1.7b")
         device = "cuda" if torch.cuda.is_available() else "cpu"
         
-        # Load the text-to-video model
-        pipe = DiffusionPipeline.from_pretrained(
-            "damo-vilab/text-to-video-ms-1.7b", 
-            torch_dtype=torch.float16 if device == "cuda" else torch.float32,
-            variant="fp16" if device == "cuda" else None
-        )
-        pipe = pipe.to(device)
-        
-        _models_cache[cache_key] = pipe
+        try:
+            pipe = DiffusionPipeline.from_pretrained(
+                "damo-vilab/text-to-video-ms-1.7b", 
+                torch_dtype=torch.float16 if device == "cuda" else torch.float32,
+                variant="fp16" if device == "cuda" else None
+            )
+            pipe = pipe.to(device)
+            _models_cache[cache_key] = pipe
+        except Exception as e:
+            logger.error(f"Could not load video diffusion model: {e}")
+            raise e
     
     return _models_cache[cache_key]

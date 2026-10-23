@@ -1,96 +1,139 @@
-import { useState } from 'react';
-import VideoPlayer from './VideoPlayer';
-import { Card, CardContent, CardFooter } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { Calendar, Download, Play } from "lucide-react";
-import { motion } from "framer-motion";
-
-interface Video {
-  id: string;
-  title: string;
-  url: string;
-  createdAt: string;
-}
+// src/components/video/VideoCard.tsx
+import { useState } from "react";
+import VideoPlayer from "./VideoPlayer";
+import { ShortsCanvasRenderer } from "./ShortsCanvasRenderer";
+import { Calendar, Download, Play, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { VideoData } from "../../services/videoService";
 
 interface VideoCardProps {
-  video: Video;
+  video: VideoData;
 }
 
-const VideoCard = ({ video }: VideoCardProps) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  
-  const formattedDate = new Date(video.createdAt).toLocaleDateString();
-  
+export const VideoCard = ({ video }: VideoCardProps) => {
+  const [isPlayingModal, setIsPlayingModal] = useState(false);
+  const formattedDate = video.createdAt ? new Date(video.createdAt).toLocaleDateString() : "Recent";
+  const thumbnail = video.thumbnailUrl || video.shortData?.scenes[0]?.mediaUrl || video.url;
+
   return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Card className="overflow-hidden border-2 border-blue-100 dark:border-blue-900 bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-black">
-        <div className="relative">
-          {isPlaying ? (
-            <VideoPlayer src={video.url} />
-          ) : (
-            <div 
-              className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-black dark:to-indigo-900/10 flex items-center justify-center cursor-pointer relative overflow-hidden"
-              onClick={() => setIsPlaying(true)}
+    <>
+      <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+        <div className="overflow-hidden rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-fill)] backdrop-blur-xl hover:border-white/30 transition-all shadow-lg flex flex-col justify-between group select-none">
+          <div className="relative">
+            <div
+              className="aspect-[9/16] max-h-72 w-full bg-black/40 flex items-center justify-center cursor-pointer relative overflow-hidden"
+              onClick={() => setIsPlayingModal(true)}
             >
-              {/* Decorative elements */}
-              <div className="absolute -right-12 -top-12 w-24 h-24 bg-blue-200/50 dark:bg-blue-800/20 rounded-full"></div>
-              <div className="absolute -left-12 -bottom-12 w-24 h-24 bg-indigo-200/50 dark:bg-indigo-800/20 rounded-full"></div>
-              
-              <motion.div 
-                className="absolute inset-0 flex items-center justify-center"
-                whileHover={{ scale: 1.1 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-                  <Play className="w-8 h-8 text-white ml-1" />
+              {thumbnail ? (
+                <img
+                  src={thumbnail}
+                  alt={video.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = "none";
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-white/10 via-black to-black" />
+              )}
+
+              {/* Play Overlay on Hover */}
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/15 transition-colors flex items-center justify-center">
+                <div className="size-11 rounded-full bg-white text-[#2f2f33] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                  <Play className="w-4 h-4 ml-0.5 fill-current" />
                 </div>
-              </motion.div>
-              
-              <div className="absolute top-2 right-2">
-                <Badge variant="outline" className="bg-white/80 dark:bg-gray-900/80">
-                  Video
-                </Badge>
+              </div>
+
+              {/* Aspect Ratio Badge */}
+              <div className="absolute top-2.5 right-2.5">
+                <span className="bg-black/70 backdrop-blur-md border border-white/10 text-white text-[10px] font-sans px-2.5 py-0.5 rounded-full">
+                  9:16 VERTICAL
+                </span>
               </div>
             </div>
-          )}
-        </div>
-        
-        <CardContent className="p-4">
-          <h3 className="font-semibold text-lg mb-1 line-clamp-1">{video.title}</h3>
-          <div className="flex items-center text-gray-500 text-sm">
-            <Calendar className="h-3 w-3 mr-1" />
-            <span>Created on {formattedDate}</span>
           </div>
-        </CardContent>
-        
-        <CardFooter className="p-4 pt-0 flex justify-between">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-blue-600 dark:text-blue-400"
-            onClick={() => setIsPlaying(!isPlaying)}
-          >
-            {isPlaying ? 'Pause' : 'Play'}
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-white dark:text-gray-400 font-bold"
-            asChild
-          >
-            <a href={video.url} download>
-              <Download className="h-3 w-3 mr-1" />
-              Download
+
+          <div className="p-3.5 space-y-1">
+            <h3 className="font-medium text-xs text-[var(--heading)] tracking-tight line-clamp-1">
+              {video.title}
+            </h3>
+            <div className="flex items-center justify-between text-[11px] font-sans text-[var(--body-muted)] pt-1">
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3 w-3 opacity-60" />
+                {formattedDate}
+              </span>
+              <span className="text-cyan-400 font-medium">FLOWSTATE AI</span>
+            </div>
+          </div>
+
+          <div className="p-3 pt-0 flex justify-between items-center border-t border-white/10 mt-auto bg-black/20">
+            <button
+              className="text-xs font-sans text-cyan-300 hover:text-white transition-colors cursor-pointer"
+              onClick={() => setIsPlayingModal(true)}
+            >
+              Inspect Short
+            </button>
+
+            <a
+              href={video.url}
+              download={`${video.title.replace(/[^a-z0-9]/gi, "_")}.mp4`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 text-xs font-sans transition-colors"
+            >
+              <Download className="h-3 w-3" />
+              <span>MP4</span>
             </a>
-          </Button>
-        </CardFooter>
-      </Card>
-    </motion.div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Fullscreen Video Inspection Modal */}
+      <AnimatePresence>
+        {isPlayingModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-2xl p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-sm rounded-3xl overflow-hidden border border-white/15 bg-[#04050c] shadow-2xl flex flex-col"
+            >
+              <div className="p-3.5 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <h4 className="text-xs font-medium text-white truncate max-w-[220px]">
+                  {video.title}
+                </h4>
+                <button
+                  onClick={() => setIsPlayingModal(false)}
+                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-4 flex justify-center bg-black">
+                {video.shortData ? (
+                  <ShortsCanvasRenderer short={video.shortData} />
+                ) : (
+                  <VideoPlayer src={video.url} />
+                )}
+              </div>
+
+              <div className="p-3.5 border-t border-white/10 flex items-center justify-between text-xs font-sans bg-white/5">
+                <span className="text-[var(--body-muted)]">60 FPS Ken Burns Compositor</span>
+                <a
+                  href={video.url}
+                  download
+                  className="btn-pill-white text-xs h-7 px-3 flex items-center gap-1"
+                >
+                  <Download className="w-3 h-3" />
+                  <span>Download</span>
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

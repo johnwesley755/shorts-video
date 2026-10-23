@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { generateVideo } from '../services/videoService';
+import { generateVideo, BackendGenerateResponse } from '../services/videoService';
 
 export const useVideoGeneration = () => {
   const [loading, setLoading] = useState(false);
@@ -10,8 +10,8 @@ export const useVideoGeneration = () => {
     setError(null);
     
     try {
-      const videoUrl = await generateVideo(text, enableAudio);
-      return videoUrl;
+      const response: BackendGenerateResponse = await generateVideo(text, enableAudio);
+      return response.videoUrl;
     } catch (err) {
       setError('Failed to generate video. Please try again.');
       console.error(err);

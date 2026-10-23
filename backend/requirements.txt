@@ -1,4 +1,4 @@
-﻿accelerate==1.4.0
+accelerate==1.4.0
 blinker==1.9.0
 certifi==2025.1.31
 charset-normalizer==3.4.1
@@ -45,3 +45,5 @@ typing_extensions==4.12.2
 urllib3==2.3.0
 zipp==3.21.0
 gtts==2.2.3
+pyttsx3>=2.90
+pywin32>=305; sys_platform=='win32'

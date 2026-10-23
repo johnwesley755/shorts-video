@@ -1,52 +1,57 @@
 import re
-from models.model_loader import get_text_summarization_model
+import logging
+from typing import List, Dict
 
-def process_text(text):
+logger = logging.getLogger(__name__)
+
+def decompose_text_to_scenes(prompt: str) -> List[Dict[str, str]]:
     """
-    Process the input text and split it into segments
-    
-    Args:
-        text (str): The input text to process
-        
-    Returns:
-        list: A list of text segments
+    Decomposes an idea or raw script into 3-4 structured Shorts narrative scenes.
+    Each scene contains:
+    - scene_text: Narration voiceover script
+    - visual_prompt: Tailored positive prompt conditioned for diffusion image models
     """
-    # Clean the text
-    text = text.strip()
+    clean_text = prompt.strip()
     
-    # Split text into sentences
-    sentences = re.split(r'(?<=[.!?])\s+', text)
-    
-    # Group sentences into segments (you can adjust the logic based on your needs)
-    segments = []
-    current_segment = ""
-    
-    for sentence in sentences:
-        if not sentence:
-            continue
-            
-        # If adding this sentence would make the segment too long, start a new segment
-        if len(current_segment) + len(sentence) > 200:  # Adjust max length as needed
-            if current_segment:
-                segments.append(current_segment.strip())
-            current_segment = sentence
-        else:
-            if current_segment:
-                current_segment += " " + sentence
-            else:
-                current_segment = sentence
-    
-    # Add the last segment if it's not empty
-    if current_segment:
-        segments.append(current_segment.strip())
-    
-    # If the text is very long, use summarization to create a more concise version
-    if len(text) > 1000:
-        try:
-            summarizer = get_text_summarization_model()
-            summary = summarizer(text, max_length=150, min_length=30, do_sample=False)[0]['summary_text']
-            segments.insert(0, summary)  # Add summary as the first segment
-        except Exception as e:
-            print(f"Error during summarization: {str(e)}")
-    
-    return segments
+    # Check if user provided multi-sentence input
+    raw_sentences = [
+        s.strip() for s in re.split(r'(?<=[.!?])\s+|\n+', clean_text)
+        if len(s.strip()) > 10
+    ]
+
+    if len(raw_sentences) >= 3:
+        scenes = []
+        for i, sentence in enumerate(raw_sentences[:4]):
+            scenes.append({
+                "scene_text": sentence,
+                "visual_prompt": f"{sentence}, dramatic cinematic lighting, photorealistic, 8k, Unreal Engine 5, dynamic shot {i+1}",
+                "order": i + 1
+            })
+        return scenes
+
+    # Auto-generate a high-retention 3-scene viral Shorts narrative arc
+    # 1. The Hook, 2. The Core Reveal, 3. The Climax
+    return [
+        {
+            "scene_text": f"Did you know? {clean_text}.",
+            "visual_prompt": f"Dramatic establishing visual of {clean_text}, atmospheric volumetric fog, hyperdetailed photorealistic 8k, award winning cinematography",
+            "order": 1
+        },
+        {
+            "scene_text": f"Beneath the surface, the hidden reality of {clean_text} defies everything scientists thought possible.",
+            "visual_prompt": f"Intense close-up cinematic reveal of {clean_text}, mysterious glowing elements, highly detailed, photorealistic 9:16 vertical masterpiece",
+            "order": 2
+        },
+        {
+            "scene_text": f"This discovery completely alters our understanding of {clean_text}.",
+            "visual_prompt": f"Epic wide-angle climax visual of {clean_text}, stunning cosmic scale, breathtaking composition, cinematic photorealism",
+            "order": 3
+        }
+    ]
+
+def process_text(text: str) -> List[str]:
+    """
+    Legacy helper to return list of text segments for backward compatibility.
+    """
+    scenes = decompose_text_to_scenes(text)
+    return [s["scene_text"] for s in scenes]
